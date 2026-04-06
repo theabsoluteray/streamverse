@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getMovieById, tmdbImg } from "@/lib/tmdb";
-import { Play, Plus, ArrowLeft } from "lucide-react";
-import LandscapeCarousel from "@/components/LandscapeCarousel";
-import { LandscapeCardProps } from "@/components/LandscapeCard";
+import { Play, Plus, ArrowLeft, Star, ArrowDownToLine, LayoutGrid } from "lucide-react";
+import LandscapeCard, { LandscapeCardProps } from "@/components/LandscapeCard";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -34,6 +33,7 @@ export default async function MovieDetailPage({ params }: Props) {
   }
 
   const cast = movie.credits?.cast?.slice(0, 12) || [];
+  const logo = movie.images?.logos?.find((l: any) => l.iso_639_1 === "en")?.file_path || movie.images?.logos?.[0]?.file_path;
   const recs: LandscapeCardProps[] = (movie.recommendations?.results || [])
     .slice(0, 15)
     .map((m: { id: number; title: string; backdrop_path: string | null; vote_average: number }) => ({
@@ -70,26 +70,77 @@ export default async function MovieDetailPage({ params }: Props) {
         </Link>
 
         {/* Title overlay at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-12 lg:px-16 pb-8">
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">{movie.title}</h1>
+        <div className="absolute bottom-10 left-0 right-0 px-6 md:px-12 lg:px-16 pb-8 z-10">
+          {logo ? (
+            <div className="relative max-w-xs md:max-w-sm h-20 md:h-28 mb-3">
+              <Image src={tmdbImg(logo, "w500")} alt={movie.title} fill className="object-contain object-left-bottom drop-shadow-2xl" />
+            </div>
+          ) : (
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-lg">{movie.title}</h1>
+          )}
+          
+          {/* Metadata Row */}
+          <div className="flex items-center gap-2 flex-wrap text-[11px] md:text-[13px] text-neutral-300 font-medium mb-4 uppercase tracking-wider">
+            <div className="flex items-center gap-1 text-yellow-400">
+              <Star className="w-4 h-4 fill-current" />
+              <span>{(movie.vote_average || 0).toFixed(1)}</span>
+            </div>
+            <span className="text-neutral-500">|</span>
+            {movie.release_date && (
+              <>
+                <span>{movie.release_date.slice(0, 4)}</span>
+                <span className="text-neutral-500">|</span>
+              </>
+            )}
+            {movie.runtime > 0 && (
+              <>
+                <span>{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m</span>
+                <span className="text-neutral-500">|</span>
+              </>
+            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {movie.genres?.map((g: any, i: number) => (
+                <span key={g.id} className="flex items-center gap-2 text-neutral-400">
+                  {g.name}
+                  {i < movie.genres.length - 1 && <span className="text-neutral-500">|</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Overview */}
+          {movie.overview && (
+            <p className="text-neutral-300 text-xs md:text-sm max-w-2xl mb-6 line-clamp-3 md:line-clamp-4 leading-relaxed drop-shadow-md">
+              {movie.overview}
+            </p>
+          )}
+
           <div className="flex items-center gap-3 flex-wrap">
             <Link
               href={`/movies/watch/${movie.id}`}
               id={`detail-play-${movie.id}`}
-              className="flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-neutral-200 text-black font-bold rounded-lg text-sm transition-all"
+              className="flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-neutral-200 text-black font-bold rounded-lg text-sm transition-all shadow-lg shadow-white/10"
             >
               <Play className="w-4 h-4 fill-black" />
               Play
             </Link>
-            <button className="w-10 h-10 rounded-full border border-neutral-600 flex items-center justify-center text-white hover:border-white transition-colors">
+            <button className="w-10 h-10 rounded-full bg-neutral-800/80 border border-neutral-600 flex items-center justify-center text-white hover:bg-neutral-700 transition-colors backdrop-blur-sm">
               <Plus className="w-5 h-5" />
             </button>
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-neutral-800/80 border border-neutral-600 text-white font-medium rounded-lg text-sm hover:bg-neutral-700 transition-colors backdrop-blur-sm hidden sm:flex">
+              <ArrowDownToLine className="w-4 h-4" />
+              Download
+            </button>
+            <a href="#similars" className="flex items-center gap-2 px-5 py-2.5 bg-neutral-800/80 border border-neutral-600 text-white font-medium rounded-lg text-sm hover:bg-neutral-700 transition-colors backdrop-blur-sm hidden sm:flex">
+              <LayoutGrid className="w-4 h-4" />
+              Similars
+            </a>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-10">
+      <div className="w-full px-6 md:px-12 lg:px-16 py-10">
         {/* Actors Grid */}
         {cast.length > 0 && (
           <div className="mb-10">
@@ -116,7 +167,16 @@ export default async function MovieDetailPage({ params }: Props) {
       </div>
 
       {/* Recommendations */}
-      {recs.length > 0 && <LandscapeCarousel title="You may like" items={recs} />}
+      {recs.length > 0 && (
+        <div id="similars" className="w-full px-6 md:px-12 lg:px-16 pb-12 pt-4">
+          <h2 className="section-title text-white mb-6">You may like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
+            {recs.map((rec) => (
+              <LandscapeCard key={rec.id} {...rec} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

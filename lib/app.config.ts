@@ -7,7 +7,7 @@
 
 export const APP_CONFIG = {
   /** Site name shown in navbar, footer, and metadata */
-  siteName: "StreamVerse",
+  siteName: "LostArchive",
 
   /** Your GitHub repository or profile link */
   githubUrl: "https://github.com",
@@ -17,7 +17,7 @@ export const APP_CONFIG = {
 
   /** Footer disclaimer text */
   disclaimer:
-    "StreamVerse does not host any video content. All streams are provided by third-party embed providers. " +
+    "LostArchive does not host any video content. All streams are provided by third-party embed providers. " +
     "We use the AniList GraphQL API and The Movie Database (TMDB) API for metadata. " +
     "This site is intended for educational and personal use only.",
 } as const;

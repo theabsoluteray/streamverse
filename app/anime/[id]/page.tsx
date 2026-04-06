@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getAnimeById, getRecommendedAnime } from "@/lib/anilist";
-import { Play, Plus, ArrowLeft } from "lucide-react";
-import Carousel from "@/components/Carousel";
-import { CardProps } from "@/components/Card";
+import { Play, Plus, ArrowLeft, Star, ArrowDownToLine, LayoutGrid } from "lucide-react";
+import Card, { CardProps } from "@/components/Card";
+import AnimeDetailEpisodeList from "@/components/AnimeDetailEpisodeList";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -64,23 +64,82 @@ export default async function AnimeDetailPage({ params }: Props) {
           <ArrowLeft className="w-5 h-5" />
         </Link>
 
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-12 lg:px-16 pb-8">
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">{title}</h1>
+        <div className="absolute bottom-10 left-0 right-0 px-6 md:px-12 lg:px-16 pb-8 z-10">
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-lg max-w-2xl">{title}</h1>
+          
+          {/* Metadata Row */}
+          <div className="flex items-center gap-2 flex-wrap text-[11px] md:text-[13px] text-neutral-300 font-medium mb-4 uppercase tracking-wider">
+            <div className="flex items-center gap-1 text-yellow-400">
+              <Star className="w-4 h-4 fill-current" />
+              <span>{((anime.averageScore || 0) / 10).toFixed(1)}</span>
+            </div>
+            <span className="text-neutral-500">|</span>
+            {anime.seasonYear && (
+              <>
+                <span>{anime.seasonYear}</span>
+                <span className="text-neutral-500">|</span>
+              </>
+            )}
+            {anime.episodes && (
+              <>
+                <span>{anime.episodes} Episodes</span>
+                <span className="text-neutral-500">|</span>
+              </>
+            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {anime.genres?.slice(0, 3).map((g: string, i: number) => (
+                <span key={g} className="flex items-center gap-2 text-neutral-400">
+                  {g}
+                  {i < Math.min(anime.genres.length, 3) - 1 && <span className="text-neutral-500">|</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {anime.description && (
+            <p 
+              className="text-neutral-300 text-xs md:text-sm max-w-2xl mb-6 line-clamp-3 md:line-clamp-4 leading-relaxed drop-shadow-md"
+              dangerouslySetInnerHTML={{ __html: anime.description }} 
+            />
+          )}
+
           <div className="flex items-center gap-3 flex-wrap">
             <Link href={`/anime/watch/${anime.id}`} id={`detail-play-${anime.id}`}
-              className="flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-neutral-200 text-black font-bold rounded-lg text-sm transition-all">
+              className="flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-neutral-200 text-black font-bold rounded-lg text-sm transition-all shadow-lg shadow-white/10">
               <Play className="w-4 h-4 fill-black" /> Play
             </Link>
-            <button className="w-10 h-10 rounded-full border border-neutral-600 flex items-center justify-center text-white hover:border-white transition-colors">
+            <button className="w-10 h-10 rounded-full bg-neutral-800/80 border border-neutral-600 flex items-center justify-center text-white hover:bg-neutral-700 transition-colors backdrop-blur-sm">
               <Plus className="w-5 h-5" />
             </button>
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-neutral-800/80 border border-neutral-600 text-white font-medium rounded-lg text-sm hover:bg-neutral-700 transition-colors backdrop-blur-sm hidden sm:flex">
+              <ArrowDownToLine className="w-4 h-4" />
+              Download
+            </button>
+            <a href="#similars" className="flex items-center gap-2 px-5 py-2.5 bg-neutral-800/80 border border-neutral-600 text-white font-medium rounded-lg text-sm hover:bg-neutral-700 transition-colors backdrop-blur-sm hidden sm:flex">
+              <LayoutGrid className="w-4 h-4" />
+              Similars
+            </a>
           </div>
         </div>
       </div>
 
+      {/* Episode List directly on the detail page */}
+      <div className="w-full px-6 md:px-12 lg:px-16 mt-6">
+        <AnimeDetailEpisodeList
+          animeId={anime.id}
+          totalEpisodes={anime.episodes || 24}
+          animeBackdrop={backdrop}
+        />
+      </div>
+
       {recommended.length > 0 && (
-        <div className="mt-6">
-          <Carousel title="You may like" items={recommended} />
+        <div id="similars" className="w-full px-6 md:px-12 lg:px-16 pb-12 pt-10">
+          <h2 className="section-title text-white mb-6">You may like</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {recommended.map((rec) => (
+              <Card key={rec.id} {...rec} />
+            ))}
+          </div>
         </div>
       )}
     </div>

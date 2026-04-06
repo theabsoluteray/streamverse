@@ -12,14 +12,14 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "StreamVerse — Anime, Movies & Series",
-    template: "%s | StreamVerse",
+    default: "LostArchive — Anime, Movies & Series",
+    template: "%s | LostArchive",
   },
   description:
     "Stream your favorite Anime, Movies, and TV Series for free. Powered by AniList and TMDB.",
   keywords: ["anime", "movies", "series", "streaming", "watch online", "free streaming"],
   openGraph: {
-    siteName: "StreamVerse",
+    siteName: "LostArchive",
     type: "website",
   },
 };
@@ -30,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${inter.variable}`}>
-      <body className="antialiased min-h-screen bg-black text-neutral-100 font-[var(--font-inter)]">
+    <html lang="en" className={`dark ${inter.variable}`} suppressHydrationWarning>
+      <body className="antialiased min-h-screen bg-black text-neutral-100 font-[var(--font-inter)] overflow-x-hidden" suppressHydrationWarning>
         <Navbar />
         <main className="min-h-screen">{children}</main>
         <Footer />

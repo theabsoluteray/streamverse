@@ -127,7 +127,7 @@ export async function getNowPlayingMovies(page = 1): Promise<TMDBMovie[]> {
 }
 
 export async function getMovieById(id: number): Promise<TMDBMovie> {
-  return tmdbFetch<TMDBMovie>(`/movie/${id}`, { append_to_response: "credits,videos,recommendations" });
+  return tmdbFetch<TMDBMovie>(`/movie/${id}`, { append_to_response: "credits,videos,recommendations,images" });
 }
 
 export async function searchMovies(query: string, page = 1): Promise<{ results: TMDBMovie[]; total: number }> {
@@ -158,7 +158,7 @@ export async function getAiringSeries(page = 1): Promise<TMDBSeries[]> {
 }
 
 export async function getSeriesById(id: number): Promise<TMDBSeries> {
-  return tmdbFetch<TMDBSeries>(`/tv/${id}`, { append_to_response: "credits,videos,recommendations" });
+  return tmdbFetch<TMDBSeries>(`/tv/${id}`, { append_to_response: "credits,videos,recommendations,images" });
 }
 
 export async function getSeriesSeason(tvId: number, season: number): Promise<TMDBSeason> {

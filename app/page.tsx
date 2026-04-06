@@ -9,7 +9,7 @@ import Carousel from "@/components/Carousel";
 import { CardProps } from "@/components/Card";
 
 export const metadata: Metadata = {
-  title: "StreamVerse — Anime, Movies & Series",
+  title: "LostArchive — Anime, Movies & Series",
   description: "Stream trending Anime, Movies and TV Series for free.",
 };
 

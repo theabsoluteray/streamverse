@@ -85,6 +85,7 @@ export default function SeriesWatchPage() {
         {/* Episodes List Section */}
         <EpisodeList
           type="series"
+          seriesId={seriesId}
           seasons={series.seasons}
           currentSeason={season}
           currentEpisode={episode}

@@ -5,8 +5,10 @@ import {
   getTopRatedAnime,
   getAiringAnime,
 } from "@/lib/anilist";
-import Carousel from "@/components/Carousel";
-import { CardProps } from "@/components/Card";
+import LandscapeCarousel from "@/components/LandscapeCarousel";
+import { LandscapeCardProps } from "@/components/LandscapeCard";
+import Hero, { HeroItem } from "@/components/Hero";
+import Top10Section from "@/components/Top10Section";
 
 export const metadata: Metadata = {
   title: "Anime",
@@ -23,31 +25,51 @@ export default async function AnimePage() {
     getAiringAnime(20),
   ]);
 
-  const toCards = (list: typeof trending): CardProps[] => {
-    if (list.status !== "fulfilled") return [];
-    return list.value.map((a) => ({
+  const trendingData = trending.status === "fulfilled" ? trending.value : [];
+  const popularData = popular.status === "fulfilled" ? popular.value : [];
+  const topRatedData = topRated.status === "fulfilled" ? topRated.value : [];
+  const airingData = airing.status === "fulfilled" ? airing.value : [];
+
+  const heroItems: HeroItem[] = trendingData.slice(0, 6).map((a) => ({
+    id: a.id,
+    type: "anime" as const,
+    title: a.title.english || a.title.romaji,
+    description: a.description || "",
+    backdrop: a.bannerImage || a.coverImage.extraLarge,
+    poster: a.coverImage.extraLarge,
+    rating: (a.averageScore || 0) / 10,
+    genres: a.genres,
+    year: a.seasonYear?.toString() || "",
+    watchHref: `/anime/watch/${a.id}`,
+    detailHref: `/anime/${a.id}`,
+  })).filter((h) => h.backdrop);
+
+  const top10 = popularData.slice(0, 10).map((a) => ({
+    id: a.id,
+    title: a.title.english || a.title.romaji,
+    poster: a.coverImage.extraLarge || a.coverImage.large,
+    type: "anime" as const,
+  }));
+
+  const toCards = (list: any[]): LandscapeCardProps[] => {
+    return list.map((a) => ({
       id: a.id,
       title: a.title.english || a.title.romaji,
+      backdrop: a.bannerImage || a.coverImage.extraLarge || a.coverImage.large,
       poster: a.coverImage.extraLarge || a.coverImage.large,
-      rating: a.averageScore || 0,
-      genres: a.genres,
-      year: a.seasonYear?.toString(),
+      rating: (a.averageScore || 0) / 10,
       type: "anime" as const,
-      episodes: a.episodes || undefined,
-      status: a.status,
     }));
   };
 
   return (
-    <div className="pt-20 max-w-7xl mx-auto">
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl md:text-4xl font-black text-white section-title mb-2">Anime</h1>
-        <p className="text-neutral-400 text-sm">Explore the best anime from trending to all-time classics</p>
-      </div>
-      <Carousel title="🔥 Trending Now" viewAllHref="/anime/search?sort=trending" items={toCards(trending)} />
-      <Carousel title="⭐ Popular Anime" viewAllHref="/anime/search?sort=popular" items={toCards(popular)} />
-      <Carousel title="🏆 Top Rated" viewAllHref="/anime/search?sort=top" items={toCards(topRated)} />
-      <Carousel title="📡 Currently Airing" viewAllHref="/anime" items={toCards(airing)} />
-    </div>
+    <>
+      <Hero items={heroItems} />
+      <Top10Section items={top10} />
+      <LandscapeCarousel title="🔥 Trending Now" items={toCards(trendingData)} />
+      <LandscapeCarousel title="⭐ Popular Anime" items={toCards(popularData)} />
+      <LandscapeCarousel title="🏆 Top Rated" items={toCards(topRatedData)} />
+      <LandscapeCarousel title="📡 Currently Airing" items={toCards(airingData)} />
+    </>
   );
 }

@@ -155,7 +155,7 @@ export default function Navbar() {
             <div className="w-7 h-7 rounded bg-red-500 flex items-center justify-center">
               <Play className="w-3.5 h-3.5 text-white fill-white" />
             </div>
-            <span className="text-lg font-black gradient-text hidden sm:block">StreamVerse</span>
+            <span className="text-lg font-black gradient-text hidden sm:block">LostArchive</span>
           </Link>
 
           {/* Desktop links */}

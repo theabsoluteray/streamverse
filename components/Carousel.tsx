@@ -49,13 +49,13 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
           <Swiper
             modules={[Navigation, A11y]}
             spaceBetween={14}
-            slidesPerView={2}
+            slidesPerView={2.2}
             navigation={{ prevEl, nextEl }}
             breakpoints={{
-              480: { slidesPerView: 3, spaceBetween: 14 },
-              640: { slidesPerView: 3, spaceBetween: 16 },
-              768: { slidesPerView: 4, spaceBetween: 16 },
-              1024: { slidesPerView: 5, spaceBetween: 18 },
+              480: { slidesPerView: 2.5, spaceBetween: 14 },
+              640: { slidesPerView: 3.2, spaceBetween: 16 },
+              768: { slidesPerView: 4.2, spaceBetween: 16 },
+              1024: { slidesPerView: 5.2, spaceBetween: 18 },
               1280: { slidesPerView: 6, spaceBetween: 18 },
             }}
             className="!overflow-visible"
@@ -70,14 +70,14 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
 
         <button
           ref={setPrevEl}
-          className="absolute -left-3 top-1/3 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
+          className="absolute -left-3 top-1/3 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 hidden md:flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
           aria-label="Previous"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
         </button>
         <button
           ref={setNextEl}
-          className="absolute -right-3 top-1/3 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
+          className="absolute -right-3 top-1/3 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 hidden md:flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
           aria-label="Next"
         >
           <ChevronRight className="w-4 h-4" />

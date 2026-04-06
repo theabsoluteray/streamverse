@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { ChevronDown, Search, ArrowDownToLine, ArrowDownUp } from "lucide-react";
 import { TMDBSeason, TMDBEpisode } from "@/lib/tmdb";
@@ -9,6 +9,7 @@ const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w300";
 
 interface EpisodeListProps {
   type: "series" | "anime";
+  seriesId?: number;
   seasons?: TMDBSeason[];
   currentSeason?: number;
   currentEpisode?: number;
@@ -21,6 +22,7 @@ interface EpisodeListProps {
 
 export default function EpisodeList({
   type,
+  seriesId,
   seasons,
   currentSeason = 1,
   currentEpisode = 1,
@@ -33,10 +35,30 @@ export default function EpisodeList({
   const [activeSeason, setActiveSeason] = useState(currentSeason);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [displayedCount, setDisplayedCount] = useState(4);
+  const [fetchedEpisodes, setFetchedEpisodes] = useState<TMDBEpisode[]>([]);
+  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
 
   // ─── SERIES LOGIC ─────────────────────────────
+  // Fetch episodes for the active season if we have a seriesId
+  useEffect(() => {
+    if (type === "series" && seriesId && activeSeason) {
+      setIsLoadingEpisodes(true);
+      const url = `https://api.themoviedb.org/3/tv/${seriesId}/season/${activeSeason}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`;
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.episodes) {
+            setFetchedEpisodes(data.episodes);
+          }
+        })
+        .finally(() => setIsLoadingEpisodes(false));
+    }
+  }, [type, seriesId, activeSeason]);
+
   const activSeasonData = seasons?.find((s) => s.season_number === activeSeason);
-  let episodes: TMDBEpisode[] = activSeasonData?.episodes || [];
+  // Prefer fetched episodes over static seasons prop
+  let episodes: TMDBEpisode[] = fetchedEpisodes.length > 0 ? fetchedEpisodes : (activSeasonData?.episodes || []);
 
   // ─── ANIME LOGIC ──────────────────────────────
   if (type === "anime") {
@@ -68,6 +90,13 @@ export default function EpisodeList({
     }
     return result;
   }, [episodes, searchQuery, sortOrder]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setDisplayedCount(4);
+  }, [searchQuery, sortOrder, activeSeason]);
+
+  const visibleEpisodes = filteredAndSorted.slice(0, displayedCount);
 
   return (
     <div className="w-full mt-12 pb-20">
@@ -115,8 +144,13 @@ export default function EpisodeList({
 
       {/* Episode List */}
       <div className="flex flex-col gap-2">
-        {filteredAndSorted.length > 0 ? (
-          filteredAndSorted.map((ep) => {
+        {isLoadingEpisodes ? (
+          <div className="py-12 text-center text-neutral-500 text-sm bg-[#0a0a0a] rounded-xl">
+            <div className="w-8 h-8 rounded-full border-2 border-red-500/30 border-t-red-500 animate-spin mx-auto mb-3" />
+            Loading episodes...
+          </div>
+        ) : filteredAndSorted.length > 0 ? (
+          visibleEpisodes.map((ep) => {
             const isActive =
               type === "anime"
                 ? ep.episode_number === currentAnimeEp
@@ -196,9 +230,11 @@ export default function EpisodeList({
           </div>
         )}
 
-        {filteredAndSorted.length > 0 && (
+        {!isLoadingEpisodes && displayedCount < filteredAndSorted.length && (
           <div className="flex justify-center mt-4">
-            <button className="px-6 py-2.5 rounded-full border border-neutral-800 text-neutral-400 text-xs font-semibold hover:text-white hover:border-neutral-600 transition-colors bg-[#0a0a0a]">
+            <button 
+              onClick={() => setDisplayedCount((prev) => prev + 4)}
+              className="px-6 py-2.5 rounded-full border border-neutral-800 text-neutral-400 text-xs font-semibold hover:text-white hover:border-neutral-600 transition-colors bg-[#0a0a0a]">
               Load more
             </button>
           </div>

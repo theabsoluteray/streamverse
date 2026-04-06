@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2, RefreshCw, ServerIcon, AlertCircle, ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import ServerSelector from "./ServerSelector";
 import {
   getMovieServers,
@@ -45,6 +46,15 @@ export default function Player({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParams = useSearchParams();
+
+  const handleFullscreen = useCallback(() => {
+    if (iframeRef.current?.requestFullscreen) {
+      iframeRef.current.requestFullscreen().catch(() => {});
+    } else if (containerRef.current?.requestFullscreen) {
+      containerRef.current.requestFullscreen().catch(() => {});
+    }
+  }, []);
 
   const servers = (() => {
     if (type === "movie" && tmdbId) return getMovieServers(tmdbId);
@@ -86,7 +96,13 @@ export default function Player({
     setLoadedKey(currentIframeKey);
     setShowError(false);
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
-  }, [currentIframeKey]);
+    
+    if (searchParams.get("fullscreen") === "true") {
+      setTimeout(() => {
+        handleFullscreen();
+      }, 500);
+    }
+  }, [currentIframeKey, searchParams, handleFullscreen]);
 
   useEffect(() => {
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
@@ -107,13 +123,6 @@ export default function Player({
     setShowError(false);
   };
 
-  const handleFullscreen = () => {
-    if (iframeRef.current?.requestFullscreen) {
-      iframeRef.current.requestFullscreen();
-    } else if (containerRef.current?.requestFullscreen) {
-      containerRef.current.requestFullscreen();
-    }
-  };
 
   const handleRefresh = () => {
     setShowError(false);

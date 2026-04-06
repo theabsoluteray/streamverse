@@ -49,10 +49,10 @@ export default function LandscapeCarousel({ title, items, tabs, activeTab }: Lan
           slidesPerView={1.2}
           navigation={{ prevEl, nextEl }}
           breakpoints={{
-            480: { slidesPerView: 2, spaceBetween: 10 },
-            640: { slidesPerView: 2.5, spaceBetween: 12 },
-            768: { slidesPerView: 3, spaceBetween: 12 },
-            1024: { slidesPerView: 4, spaceBetween: 14 },
+            480: { slidesPerView: 1.5, spaceBetween: 10 },
+            640: { slidesPerView: 2.2, spaceBetween: 12 },
+            768: { slidesPerView: 3.2, spaceBetween: 12 },
+            1024: { slidesPerView: 4.2, spaceBetween: 14 },
             1280: { slidesPerView: 5, spaceBetween: 14 },
           }}
           className="!overflow-visible"
@@ -66,14 +66,14 @@ export default function LandscapeCarousel({ title, items, tabs, activeTab }: Lan
 
         <button
           ref={setPrevEl}
-          className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
+          className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 hidden md:flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
           aria-label="Previous"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
         </button>
         <button
           ref={setNextEl}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
+          className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 hidden md:flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
           aria-label="Next"
         >
           <ChevronRight className="w-4 h-4" />
