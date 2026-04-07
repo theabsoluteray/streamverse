@@ -10,8 +10,6 @@ import {
   ChevronRight,
   ArrowLeft,
   ChevronDown,
-  Play,
-  Pause,
   Check,
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -57,8 +55,7 @@ export default function Player({
   const [showError, setShowError] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showServerDropdown, setShowServerDropdown] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [showPauseIndicator, setShowPauseIndicator] = useState(false);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -160,31 +157,19 @@ export default function Player({
     saveServer(key);
     setShowError(false);
     setShowServerDropdown(false);
-    setIsPaused(false);
+
   };
 
   const handleRefresh = () => {
     setShowError(false);
     setIframeKey((k) => k + 1);
-    setIsPaused(false);
   };
 
   const handleBack = () => {
     router.back();
   };
 
-  // Touch/click interaction for play/pause
-  const handlePlayerTap = useCallback(() => {
-    if (isLoading) return;
-    resetControlsTimer();
 
-    setIsPaused((prev) => {
-      const next = !prev;
-      setShowPauseIndicator(true);
-      setTimeout(() => setShowPauseIndicator(false), 800);
-      return next;
-    });
-  }, [isLoading, resetControlsTimer]);
 
   // Mouse move to show controls
   const handleMouseMove = useCallback(() => {
@@ -247,43 +232,7 @@ export default function Player({
           )}
         </AnimatePresence>
 
-        {/* Pause/Play overlay (click/touch interaction) */}
-        {isPaused && (
-          <div
-            className="absolute inset-0 z-[15] bg-black/60 cursor-pointer"
-            onClick={handlePlayerTap}
-          />
-        )}
 
-        {/* Play/Pause indicator animation */}
-        <AnimatePresence>
-          {showPauseIndicator && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.5 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex items-center justify-center z-[25] pointer-events-none"
-            >
-              <div className="w-20 h-20 rounded-full bg-black/70 flex items-center justify-center border border-white/10">
-                {isPaused ? (
-                  <Pause className="w-10 h-10 text-white" />
-                ) : (
-                  <Play className="w-10 h-10 text-white ml-1" />
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Touch/Click zone — sits on top of iframe edges for interaction */}
-        {!isPaused && !isLoading && (
-          <div
-            className="absolute inset-0 z-[12] cursor-pointer"
-            onClick={handlePlayerTap}
-            style={{ pointerEvents: 'auto' }}
-          />
-        )}
 
         {/* Iframe */}
         {currentServer && (
@@ -298,7 +247,7 @@ export default function Player({
             onLoad={handleLoad}
             onError={handleServerError}
             title={`Streaming - ${currentServer.name}`}
-            style={{ pointerEvents: isPaused ? 'none' : 'auto', zIndex: isPaused ? 5 : 11 }}
+
           />
         )}
 
