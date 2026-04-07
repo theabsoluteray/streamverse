@@ -14,7 +14,7 @@ export default function SeriesDetailEpisodeList({ seriesId, seasons }: Props) {
 
   const handleEpSelect = (season: number, ep: number) => {
     // Navigate directly to the watch page, optionally requesting fullscreen parameter 
-    router.push(`/series/watch/${seriesId}?s=${season}&e=${ep}&fullscreen=true`);
+    router.push(`/series/watch/${seriesId}?s=${season}&e=${ep}&fullscreen=false`);
   };
 
   return (

@@ -14,7 +14,7 @@ export default function AnimeDetailEpisodeList({ animeId, totalEpisodes, animeBa
 
   const handleEpSelect = (ep: number) => {
     // Navigate directly to the watch page, optionally requesting fullscreen parameter 
-    router.push(`/anime/watch/${animeId}?ep=${ep}&fullscreen=true`);
+    router.push(`/anime/watch/${animeId}?ep=${ep}&fullscreen=false`);
   };
 
   return (
