@@ -2,9 +2,19 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Maximize2, RefreshCw, ServerIcon, AlertCircle, ChevronRight } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import ServerSelector from "./ServerSelector";
+import {
+  Maximize2,
+  RefreshCw,
+  ServerIcon,
+  AlertCircle,
+  ChevronRight,
+  ArrowLeft,
+  ChevronDown,
+  Play,
+  Pause,
+  Check,
+} from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   getMovieServers,
   getSeriesServers,
@@ -45,10 +55,16 @@ export default function Player({
   const [iframeKey, setIframeKey] = useState(0);
   const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
   const [showError, setShowError] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [showServerDropdown, setShowServerDropdown] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showPauseIndicator, setShowPauseIndicator] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const handleFullscreen = useCallback(() => {
     if (iframeRef.current?.requestFullscreen) {
@@ -75,6 +91,26 @@ export default function Player({
     setFailedServers(new Set());
     setShowError(false);
   }, [season, episode, tmdbId, malId]);
+
+  // Auto-hide controls after inactivity
+  const resetControlsTimer = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+    controlsTimerRef.current = setTimeout(() => {
+      if (!showServerDropdown) {
+        setShowControls(false);
+      }
+    }, 3500);
+  }, [showServerDropdown]);
+
+  useEffect(() => {
+    if (fullScreenOnly) {
+      resetControlsTimer();
+    }
+    return () => {
+      if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+    };
+  }, [fullScreenOnly, resetControlsTimer]);
 
   const handleServerError = useCallback(() => {
     setLoadedKey(currentIframeKey);
@@ -123,19 +159,48 @@ export default function Player({
     setActiveServer(key);
     saveServer(key);
     setShowError(false);
+    setShowServerDropdown(false);
+    setIsPaused(false);
   };
-
 
   const handleRefresh = () => {
     setShowError(false);
     setIframeKey((k) => k + 1);
+    setIsPaused(false);
   };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  // Touch/click interaction for play/pause
+  const handlePlayerTap = useCallback(() => {
+    if (isLoading) return;
+    resetControlsTimer();
+
+    setIsPaused((prev) => {
+      const next = !prev;
+      setShowPauseIndicator(true);
+      setTimeout(() => setShowPauseIndicator(false), 800);
+      return next;
+    });
+  }, [isLoading, resetControlsTimer]);
+
+  // Mouse move to show controls
+  const handleMouseMove = useCallback(() => {
+    if (fullScreenOnly) {
+      resetControlsTimer();
+    }
+  }, [fullScreenOnly, resetControlsTimer]);
 
   const availableServers = servers.filter((s) => !failedServers.has(s.key));
   const nextFallback = servers.find((s) => !failedServers.has(s.key) && s.key !== activeServer);
 
   return (
-    <div className={`w-full ${fullScreenOnly ? 'fixed inset-0 z-[99999] bg-black' : 'space-y-3'}`}>
+    <div
+      className={`w-full ${fullScreenOnly ? 'fixed inset-0 z-[99999] bg-black' : 'space-y-3'}`}
+      onMouseMove={handleMouseMove}
+    >
       {/* Player Container */}
       <motion.div
         ref={containerRef}
@@ -166,7 +231,7 @@ export default function Player({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-black/95 border border-red-500/30 text-sm shadow-xl"
+              className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-black/95 border border-red-500/30 text-sm shadow-xl"
             >
               <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
               <span className="text-neutral-300">{currentServer?.name} may not be working.</span>
@@ -182,6 +247,44 @@ export default function Player({
           )}
         </AnimatePresence>
 
+        {/* Pause/Play overlay (click/touch interaction) */}
+        {isPaused && (
+          <div
+            className="absolute inset-0 z-[15] bg-black/60 cursor-pointer"
+            onClick={handlePlayerTap}
+          />
+        )}
+
+        {/* Play/Pause indicator animation */}
+        <AnimatePresence>
+          {showPauseIndicator && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.5 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0 flex items-center justify-center z-[25] pointer-events-none"
+            >
+              <div className="w-20 h-20 rounded-full bg-black/70 flex items-center justify-center border border-white/10">
+                {isPaused ? (
+                  <Pause className="w-10 h-10 text-white" />
+                ) : (
+                  <Play className="w-10 h-10 text-white ml-1" />
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Touch/Click zone — sits on top of iframe edges for interaction */}
+        {!isPaused && !isLoading && (
+          <div
+            className="absolute inset-0 z-[12] cursor-pointer"
+            onClick={handlePlayerTap}
+            style={{ pointerEvents: 'auto' }}
+          />
+        )}
+
         {/* Iframe */}
         {currentServer && (
           <iframe
@@ -195,41 +298,123 @@ export default function Player({
             onLoad={handleLoad}
             onError={handleServerError}
             title={`Streaming - ${currentServer.name}`}
+            style={{ pointerEvents: isPaused ? 'none' : 'auto', zIndex: isPaused ? 5 : 11 }}
           />
         )}
 
         {/* Top bar overlay */}
-        {!fullScreenOnly && (
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-20">
-            <div className="flex items-center gap-2 text-sm text-neutral-300">
-              <ServerIcon className="w-4 h-4 text-red-400" />
-              <span className="font-medium">{currentServer?.name}</span>
-              {type !== "movie" && (
-                <span className="text-neutral-500">
-                  {type === "anime" ? `EP ${episode}` : `S${season} E${episode}`}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 pointer-events-auto">
-              <button
-                onClick={handleRefresh}
-                id="player-refresh-btn"
-                className="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 text-neutral-400 hover:text-white transition-colors"
-                title="Refresh"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={handleFullscreen}
-                id="player-fullscreen-btn"
-                className="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 text-neutral-400 hover:text-white transition-colors"
-                title="Fullscreen"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {(showControls || !fullScreenOnly) && (
+            <motion.div
+              initial={fullScreenOnly ? { opacity: 0, y: -20 } : undefined}
+              animate={{ opacity: 1, y: 0 }}
+              exit={fullScreenOnly ? { opacity: 0, y: -20 } : undefined}
+              transition={{ duration: 0.25 }}
+              className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-black/90 via-black/50 to-transparent z-20"
+              style={{ pointerEvents: 'auto' }}
+            >
+              {/* Left: Back button + server info */}
+              <div className="flex items-center gap-3 pointer-events-auto">
+                <button
+                  onClick={handleBack}
+                  id="player-back-btn"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/50 hover:bg-red-500/30 text-neutral-300 hover:text-white transition-all border border-white/10 hover:border-red-500/40"
+                  title="Go Back"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-2 text-sm text-neutral-300">
+                  <ServerIcon className="w-4 h-4 text-red-400" />
+                  <span className="font-medium">{currentServer?.name}</span>
+                  {type !== "movie" && (
+                    <span className="text-neutral-500">
+                      {type === "anime" ? `EP ${episode}` : `S${season} E${episode}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Server dropdown + controls */}
+              <div className="flex items-center gap-2 pointer-events-auto">
+                {/* Server Selector Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowServerDropdown(!showServerDropdown)}
+                    id="player-server-dropdown-btn"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/50 hover:bg-red-500/20 text-neutral-300 hover:text-white transition-all border border-white/10 hover:border-red-500/40 text-xs font-medium"
+                    title="Change Server"
+                  >
+                    <ServerIcon className="w-3.5 h-3.5 text-red-400" />
+                    Server
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Dropdown menu */}
+                  <AnimatePresence>
+                    {showServerDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full right-0 mt-2 w-48 rounded-xl bg-black/95 border border-neutral-700/50 backdrop-blur-xl shadow-2xl overflow-hidden z-50"
+                      >
+                        <div className="p-1.5">
+                          <p className="px-2.5 py-1.5 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
+                            Select Server
+                          </p>
+                          {availableServers.map((server) => {
+                            const isActive = server.key === activeServer;
+                            return (
+                              <button
+                                key={server.key}
+                                onClick={() => handleServerChange(server.key)}
+                                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all ${
+                                  isActive
+                                    ? 'bg-red-500/15 text-red-400'
+                                    : 'text-neutral-300 hover:bg-neutral-800/60 hover:text-white'
+                                }`}
+                              >
+                                {isActive ? (
+                                  <Check className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                                ) : (
+                                  <div className="w-3.5 h-3.5 flex-shrink-0" />
+                                )}
+                                <span className="font-medium">{server.name}</span>
+                                {server.isPrimary && (
+                                  <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-red-500/15 text-red-500 border border-red-500/20 font-semibold tracking-wide">
+                                    HD
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <button
+                  onClick={handleRefresh}
+                  id="player-refresh-btn"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/50 hover:bg-red-500/30 text-neutral-400 hover:text-white transition-all border border-white/10 hover:border-red-500/40"
+                  title="Refresh"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleFullscreen}
+                  id="player-fullscreen-btn"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/50 hover:bg-red-500/30 text-neutral-400 hover:text-white transition-all border border-white/10 hover:border-red-500/40"
+                  title="Fullscreen"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Prev / Next episode controls */}
@@ -254,12 +439,52 @@ export default function Player({
         </div>
       )}
 
-      {/* Server Selector */}
+      {/* Server Selector (below player, non-fullscreen only) */}
       {!fullScreenOnly && (
-        <ServerSelector
-          servers={availableServers}
-          activeKey={activeServer}
-          onSelect={handleServerChange}
+        <div className="glass rounded-xl border border-neutral-800/40 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <ServerIcon className="w-4 h-4 text-red-400" />
+            <span className="text-sm font-semibold text-neutral-300">Streaming Servers</span>
+            <span className="text-xs text-neutral-500">— if one fails, try another</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableServers.map((server, i) => {
+              const isActive = server.key === activeServer;
+              return (
+                <motion.button
+                  key={server.key}
+                  id={`server-btn-${server.key}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  onClick={() => handleServerChange(server.key)}
+                  className={`relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 border flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-red-500/20 border-red-500/60 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                      : "border-neutral-800/50 text-neutral-400 hover:border-red-500/30 hover:text-neutral-200 hover:bg-neutral-900/50"
+                  }`}
+                >
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0 animate-pulse" />
+                  )}
+                  {server.name}
+                  {server.isPrimary && (
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-red-500/15 text-red-500 border border-red-500/20 leading-none font-semibold tracking-wide">
+                      HD
+                    </span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Click outside to close server dropdown */}
+      {showServerDropdown && (
+        <div
+          className="fixed inset-0 z-[19]"
+          onClick={() => setShowServerDropdown(false)}
         />
       )}
     </div>

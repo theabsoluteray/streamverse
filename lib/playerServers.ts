@@ -100,7 +100,7 @@ export function getAnimeServers(malId: number, episode: number, anilistId?: numb
     })
     .filter((s) => s.url !== "");
 
-  // Put VidEasy (default anime server) first
+  // Put MegaPlay (default anime server) first
   const idx = all.findIndex((s) => s.key === DEFAULT_ANIME_SERVER_KEY);
   if (idx > 0) {
     const [videasy] = all.splice(idx, 1);

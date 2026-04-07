@@ -53,7 +53,15 @@ export const PRIMARY_CONFIGS: ServerConfig[] = [
     name: "VidEasy",
     key: "videasy",
     isPrimary: true,
-    anime:  "https://player.videasy.net/anime/{anilist}/{e}",
+    movie:  "https://player.videasy.net/movie/{id}",
+    series: "https://player.videasy.net/tv/{id}/{s}/{e}",
+    supportsAnime: false,
+  },
+  {
+    name: "MegaPlay",
+    key: "megaplay",
+    isPrimary: true,
+    anime:  "https://megaplay.buzz/embed/{anilist}/{e}",
     supportsAnime: true,
     animeIdType: "anilist",
   },
@@ -62,10 +70,27 @@ export const PRIMARY_CONFIGS: ServerConfig[] = [
 // ─────────────────────────────────────────────────────────────
 //  BACKUP SERVERS  (fallback when primary fails)
 // ─────────────────────────────────────────────────────────────
-export const BACKUP_CONFIGS: ServerConfig[] = [];
+export const BACKUP_CONFIGS: ServerConfig[] = [
+  {
+    name: "2Embed",
+    key: "2embed",
+    isPrimary: false,
+    movie:  "https://www.2embed.cc/embed/{id}",
+    series: "https://www.2embed.cc/embedtv/{id}&s={s}&e={e}",
+    supportsAnime: false,
+  },
+  {
+    name: "VidNest",
+    key: "vidnest",
+    isPrimary: false,
+    movie:  "https://vidnest.fun/embed/movie/{id}",
+    series: "https://vidnest.fun/embed/tv/{id}/{s}/{e}",
+    supportsAnime: false,
+  },
+];
 
 /** Default server key loaded when no preference is saved */
 export const DEFAULT_SERVER_KEY = "vidking";
 
-/** Default server key for anime content — VidEasy has best anime support */
-export const DEFAULT_ANIME_SERVER_KEY = "videasy";
+/** Default server key for anime content — MegaPlay for anime */
+export const DEFAULT_ANIME_SERVER_KEY = "megaplay";
