@@ -191,7 +191,7 @@ export default function Player({
             className="absolute inset-0 w-full h-full"
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-            sandbox="allow-scripts allow-same-origin allow-presentation"
+            sandbox={currentServer.key === "vidking" ? "allow-scripts allow-same-origin allow-presentation" : undefined}
             onLoad={handleLoad}
             onError={handleServerError}
             title={`Streaming - ${currentServer.name}`}
