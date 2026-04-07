@@ -15,8 +15,8 @@ export interface VideoServer {
   name: string;
   key: string;
   isPrimary: boolean;
-  getMovieUrl: (tmdbId: number) => string;
-  getSeriesUrl: (tmdbId: number, season: number, episode: number) => string;
+  getMovieUrl?: (tmdbId: number) => string;
+  getSeriesUrl?: (tmdbId: number, season: number, episode: number) => string;
   getAnimeUrl?: (malId: number, episode: number) => string;
   getAnimeUrlByAnilistId?: (anilistId: number, episode: number) => string;
   supportsAnime: boolean;
@@ -42,9 +42,10 @@ function fromConfig(cfg: ServerConfig): VideoServer {
     isPrimary: cfg.isPrimary,
     supportsAnime: cfg.supportsAnime,
     animeIdType: cfg.animeIdType,
-    getMovieUrl: (id) => buildUrl(cfg.movie, { id }),
-    getSeriesUrl: (id, s, e) => buildUrl(cfg.series, { id, s, e }),
   };
+
+  if (cfg.movie) server.getMovieUrl = (id) => buildUrl(cfg.movie!, { id });
+  if (cfg.series) server.getSeriesUrl = (id, s, e) => buildUrl(cfg.series!, { id, s, e });
 
   if (cfg.supportsAnime && cfg.anime) {
     if (cfg.animeIdType === "anilist") {
@@ -69,20 +70,20 @@ export const VIDEO_SERVERS: VideoServer[] = [
 // URL BUILDERS
 // ────────────────────────────────────────────────
 export function getMovieServers(tmdbId: number) {
-  return VIDEO_SERVERS.map((s) => ({
+  return VIDEO_SERVERS.filter((s) => s.getMovieUrl).map((s) => ({
     name: s.name,
     key: s.key,
     isPrimary: s.isPrimary,
-    url: s.getMovieUrl(tmdbId),
+    url: s.getMovieUrl!(tmdbId),
   }));
 }
 
 export function getSeriesServers(tmdbId: number, season: number, episode: number) {
-  return VIDEO_SERVERS.map((s) => ({
+  return VIDEO_SERVERS.filter((s) => s.getSeriesUrl).map((s) => ({
     name: s.name,
     key: s.key,
     isPrimary: s.isPrimary,
-    url: s.getSeriesUrl(tmdbId, season, episode),
+    url: s.getSeriesUrl!(tmdbId, season, episode),
   }));
 }
 

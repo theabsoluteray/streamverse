@@ -9,10 +9,11 @@ html {
 }
 
 body {
-  background-color: #000000;
+  background-color: #030303; /* Deepest black with a hint of texture */
   color: #e5e5e5;
   font-family: var(--font-inter), system-ui, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Custom Scrollbar */
@@ -49,13 +50,64 @@ body {
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.1);
 }
 
-/* Card hover */
+/* Card hover enhancements */
 .card-hover {
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 5px 15px rgba(239, 68, 68, 0.15);
+  z-index: 20;
+}
+
+/* Premium Glass & Blur overlays */
+.premium-glass {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.premium-glass-bottom {
+  background: linear-gradient(to top, rgba(5,5,5,0.95) 0%, rgba(10,10,10,0.8) 50%, transparent 100%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Shine sweep animation for buttons */
+@keyframes shine {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  50%, 100% { transform: translateX(200%) skewX(-15deg); }
+}
+.btn-shine-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.3) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  animation: shine 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ken Burns utility */
+@keyframes kenburns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+.animate-kenburns {
+  animation: kenburns 20s ease-out forwards;
 }
 
 /* Gradient text */
@@ -151,9 +203,8 @@ iframe {
   color: #999;
 }
 
-/* Top 10 number */
+/* Top 10 number element */
 .top10-number {
-  font-size: 8rem;
   font-weight: 900;
   line-height: 1;
   color: transparent;

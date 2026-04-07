@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getTrendingAnime, getPopularAnime } from "@/lib/anilist";
-import { getTrendingMovies, getTrendingSeries, getTopRatedMovies, getTopRatedSeries, tmdbImg } from "@/lib/tmdb";
+import { getTrendingAnime, getPopularAnime, getAnimeById } from "@/lib/anilist";
+import { getTrendingMovies, getTrendingSeries, getTopRatedMovies, getTopRatedSeries, tmdbImg, getMovieById, getSeriesById } from "@/lib/tmdb";
 import Hero, { HeroItem } from "@/components/Hero";
 import LandscapeCarousel from "@/components/LandscapeCarousel";
 import { LandscapeCardProps } from "@/components/LandscapeCard";
@@ -33,12 +33,20 @@ export default async function HomePage() {
   const topM = topMovies.status === "fulfilled" ? topMovies.value : [];
   const topS = topSeries.status === "fulfilled" ? topSeries.value : [];
 
+  // Fetch details for hero items to get their trailers
+  const [heroMovies, heroSeries, heroAnime] = await Promise.all([
+    Promise.all(movies.slice(0, 3).map((m) => getMovieById(m.id).catch(() => m))),
+    Promise.all(series.slice(0, 2).map((s) => getSeriesById(s.id).catch(() => s))),
+    Promise.all(anime.slice(0, 2).map((a) => getAnimeById(a.id).catch(() => a))),
+  ]);
+
   // Hero items
   const heroItems: HeroItem[] = [
-    ...movies.slice(0, 3).map((m) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...heroMovies.map((m: any) => ({
       id: m.id,
       type: "movie" as const,
-      title: m.title,
+      title: m.title || m.original_title,
       description: m.overview,
       backdrop: tmdbImg(m.backdrop_path, "original"),
       poster: tmdbImg(m.poster_path, "w500"),
@@ -47,11 +55,13 @@ export default async function HomePage() {
       year: m.release_date?.slice(0, 4) || "",
       watchHref: `/movies/watch/${m.id}`,
       detailHref: `/movies/${m.id}`,
+      trailerKey: m.videos?.results?.find((v: any) => v.site === "YouTube" && v.type === "Trailer")?.key,
     })),
-    ...series.slice(0, 2).map((s) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...heroSeries.map((s: any) => ({
       id: s.id,
       type: "series" as const,
-      title: s.name,
+      title: s.name || s.original_name,
       description: s.overview,
       backdrop: tmdbImg(s.backdrop_path, "original"),
       poster: tmdbImg(s.poster_path, "w500"),
@@ -60,8 +70,10 @@ export default async function HomePage() {
       year: s.first_air_date?.slice(0, 4) || "",
       watchHref: `/series/watch/${s.id}`,
       detailHref: `/series/${s.id}`,
+      trailerKey: s.videos?.results?.find((v: any) => v.site === "YouTube" && v.type === "Trailer")?.key,
     })),
-    ...anime.slice(0, 2).map((a) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...heroAnime.map((a: any) => ({
       id: a.id,
       type: "anime" as const,
       title: a.title.english || a.title.romaji,
@@ -73,6 +85,7 @@ export default async function HomePage() {
       year: a.seasonYear?.toString() || "",
       watchHref: `/anime/watch/${a.id}`,
       detailHref: `/anime/${a.id}`,
+      trailerKey: a.trailer?.site === "youtube" ? a.trailer.id : undefined,
     })),
   ]
     .filter((h) => h.backdrop && h.backdrop !== "/placeholder.jpg")

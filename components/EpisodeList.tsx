@@ -103,59 +103,55 @@ export default function EpisodeList({
       <h2 className="section-title text-white mb-6 text-xl">Episodes</h2>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-4 mb-8">
         {type === "series" && seasons && seasons.length > 0 && (
-          <div className="relative">
+          <div className="relative group">
             <select
               value={activeSeason}
               onChange={(e) => setActiveSeason(Number(e.target.value))}
-              className="appearance-none bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm rounded-lg pl-4 pr-10 py-2.5 outline-none hover:border-neutral-700 focus:border-red-500 transition-colors cursor-pointer"
+              className="appearance-none bg-neutral-900/50 backdrop-blur-md border border-white/10 text-white font-medium text-sm rounded-xl pl-5 pr-12 py-3 outline-none focus:border-red-500 hover:border-white/20 hover:bg-neutral-800/80 transition-all cursor-pointer shadow-lg"
             >
               {seasons
                 .filter((s) => s.season_number > 0)
                 .map((s) => (
-                  <option key={s.season_number} value={s.season_number}>
+                  <option key={s.season_number} value={s.season_number} className="bg-neutral-900 text-white">
                     Season {s.season_number}
                   </option>
                 ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 group-hover:text-white transition-colors pointer-events-none" />
           </div>
         )}
 
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+        <div className="relative flex-1 max-w-md group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 group-focus-within:text-red-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search episode..."
+            placeholder="Search episodes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm rounded-lg pl-9 pr-4 py-2.5 outline-none hover:border-neutral-700 focus:border-red-500 transition-colors"
+            className="w-full bg-neutral-900/50 backdrop-blur-md border border-white/10 text-white placeholder-neutral-500 text-sm rounded-xl pl-11 pr-4 py-3 outline-none focus:border-red-500 hover:border-white/20 hover:bg-neutral-800/80 transition-all shadow-lg"
           />
         </div>
 
         <button
           onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          className="w-10 h-10 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors"
+          className="w-12 h-12 rounded-xl bg-neutral-900/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-neutral-400 hover:text-white hover:border-white/20 hover:bg-neutral-800/80 transition-all shadow-lg"
+          title="Toggle Sort Order"
         >
           <ArrowDownUp className="w-4 h-4" />
         </button>
       </div>
 
       {/* Episode List */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {isLoadingEpisodes ? (
-          <div className="py-12 text-center text-neutral-500 text-sm bg-[#0a0a0a] rounded-xl">
-            <div className="w-8 h-8 rounded-full border-2 border-red-500/30 border-t-red-500 animate-spin mx-auto mb-3" />
-            Loading episodes...
+          <div className="py-20 text-center text-neutral-500 text-sm glass rounded-2xl border border-white/5">
+            <div className="w-10 h-10 rounded-full border-2 border-red-500/30 border-t-red-500 animate-spin mx-auto mb-4" />
+            <p className="font-medium tracking-wide">Loading episodes...</p>
           </div>
         ) : filteredAndSorted.length > 0 ? (
           visibleEpisodes.map((ep) => {
-            const isActive =
-              type === "anime"
-                ? ep.episode_number === currentAnimeEp
-                : activeSeason === currentSeason && ep.episode_number === currentEpisode;
-
             const imageSrc = ep.still_path
               ? `${TMDB_IMAGE_BASE}${ep.still_path}`
               : animeBackdrop && type === "anime"
@@ -169,43 +165,50 @@ export default function EpisodeList({
                   if (type === "anime") onSelectAnimeEp?.(ep.episode_number);
                   else onSelectEpisode?.(activeSeason, ep.episode_number);
                 }}
-                className={`group relative flex flex-col sm:flex-row items-stretch gap-4 p-2.5 rounded-xl text-left transition-all overflow-hidden ${
-                  isActive
-                    ? "bg-[#111] border-r-4 border-red-500"
-                    : "bg-[#0a0a0a] hover:bg-[#111] border-r-4 border-transparent"
-                }`}
+                className={`group relative flex flex-col sm:flex-row items-stretch gap-4 md:gap-6 p-3 md:p-4 rounded-2xl text-left transition-all duration-500 overflow-hidden bg-neutral-900/40 backdrop-blur-sm border border-white/5 hover:bg-neutral-800/60 hover:border-white/10 hover:shadow-2xl hover:-translate-y-0.5`}
               >
+                {/* Background glow on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-[-100%] group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
+
                 {/* Thumbnail */}
-                <div className="relative w-full sm:w-48 xl:w-56 aspect-[16/9] rounded-lg overflow-hidden flex-shrink-0 bg-neutral-900">
+                <div className="relative w-full sm:w-56 xl:w-64 aspect-[16/9] rounded-xl overflow-hidden flex-shrink-0 bg-black/50 ring-1 ring-white/10 group-hover:ring-red-500/40 transition-all">
                   <Image
                     src={imageSrc}
                     alt={ep.name}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                     loading="lazy"
                   />
-                  {/* Episode Number overlay */}
-                  <div className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded">
-                    {ep.episode_number}
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  
+                  {/* Episode Number Badge */}
+                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded shadow-lg border border-white/10">
+                    EP {ep.episode_number}
                   </div>
+                  
                   {/* Play Overlay */}
-                  <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/30">
-                      <div className="w-0 h-0 ml-0.5 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-red-600/90 backdrop-blur-sm shadow-[0_0_20px_rgba(239,68,68,0.6)] flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-500">
+                      <div className="w-0 h-0 ml-1 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent" />
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0 py-1 flex flex-col justify-center">
-                  <h3 className={`text-sm md:text-base font-bold truncate ${isActive ? "text-red-400" : "text-neutral-200"}`}>
-                    {ep.name || `Episode ${ep.episode_number}`}
-                  </h3>
-                  {ep.runtime && (
-                    <p className="text-xs text-neutral-500 mt-1">{ep.runtime} min</p>
-                  )}
+                <div className="flex-1 min-w-0 py-2 flex flex-col justify-center z-10">
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="text-base md:text-lg font-black tracking-wide truncate transition-colors duration-300 text-neutral-200 group-hover:text-white">
+                      {ep.name || `Episode ${ep.episode_number}`}
+                    </h3>
+                    {ep.runtime != null && ep.runtime > 0 && (
+                      <span className="text-xs font-bold px-2 py-1 bg-black/40 text-neutral-400 rounded-md whitespace-nowrap border border-white/5">
+                        {ep.runtime}m
+                      </span>
+                    )}
+                  </div>
                   {ep.overview ? (
-                    <p className="text-xs text-neutral-400 mt-2 line-clamp-2 md:line-clamp-3 leading-relaxed w-[90%]">
+                    <p className="text-xs md:text-sm text-neutral-400 mt-2 line-clamp-2 md:line-clamp-3 leading-relaxed max-w-[90%] group-hover:text-neutral-300 transition-colors">
                       {ep.overview}
                     </p>
                   ) : (
@@ -215,9 +218,9 @@ export default function EpisodeList({
                   )}
                 </div>
 
-                {/* Download Button */}
-                <div className="hidden sm:flex items-center justify-center pr-4">
-                  <div className="w-8 h-8 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-800 flex items-center justify-center transition-colors">
+                {/* Optional Action Button */}
+                <div className="hidden sm:flex items-center justify-center px-2 z-10">
+                  <div className="w-10 h-10 rounded-full bg-black/30 border border-white/5 text-neutral-400 group-hover:text-white hover:bg-red-600 hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] flex items-center justify-center transition-all duration-300">
                     <ArrowDownToLine className="w-4 h-4" />
                   </div>
                 </div>
@@ -225,17 +228,17 @@ export default function EpisodeList({
             );
           })
         ) : (
-          <div className="py-12 text-center text-neutral-500 text-sm bg-[#0a0a0a] rounded-xl">
-            No episodes found.
+          <div className="py-20 text-center text-neutral-500 text-sm glass rounded-2xl border border-white/5">
+            <p className="font-medium">No episodes found matching your criteria.</p>
           </div>
         )}
 
         {!isLoadingEpisodes && displayedCount < filteredAndSorted.length && (
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center mt-8">
             <button 
               onClick={() => setDisplayedCount((prev) => prev + 4)}
-              className="px-6 py-2.5 rounded-full border border-neutral-800 text-neutral-400 text-xs font-semibold hover:text-white hover:border-neutral-600 transition-colors bg-[#0a0a0a]">
-              Load more
+              className="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-bold tracking-wide transition-all hover:scale-105 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+              LOAD MORE EPISODES
             </button>
           </div>
         )}

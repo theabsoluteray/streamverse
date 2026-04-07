@@ -25,6 +25,7 @@ interface PlayerProps {
   hasNext?: boolean;
   hasPrev?: boolean;
   progressId?: string;
+  fullScreenOnly?: boolean;
 }
 
 export default function Player({
@@ -38,6 +39,7 @@ export default function Player({
   onPrev,
   hasNext,
   hasPrev,
+  fullScreenOnly = false,
 }: PlayerProps) {
   const [activeServer, setActiveServer] = useState<string>(getSavedServer(type));
   const [iframeKey, setIframeKey] = useState(0);
@@ -133,14 +135,14 @@ export default function Player({
   const nextFallback = servers.find((s) => !failedServers.has(s.key) && s.key !== activeServer);
 
   return (
-    <div className="w-full space-y-3">
+    <div className={`w-full ${fullScreenOnly ? 'fixed inset-0 z-[99999] bg-black' : 'space-y-3'}`}>
       {/* Player Container */}
       <motion.div
         ref={containerRef}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative w-full aspect-video rounded-xl overflow-hidden border border-red-500/20 glow-red bg-black"
+        className={`relative w-full ${fullScreenOnly ? 'h-full rounded-none border-none' : 'aspect-video rounded-xl border border-red-500/20 glow-red'} overflow-hidden bg-black`}
       >
         {/* Loading overlay */}
         <AnimatePresence>
@@ -196,39 +198,41 @@ export default function Player({
         )}
 
         {/* Top bar overlay */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-20">
-          <div className="flex items-center gap-2 text-sm text-neutral-300">
-            <ServerIcon className="w-4 h-4 text-red-400" />
-            <span className="font-medium">{currentServer?.name}</span>
-            {type !== "movie" && (
-              <span className="text-neutral-500">
-                {type === "anime" ? `EP ${episode}` : `S${season} E${episode}`}
-              </span>
-            )}
+        {!fullScreenOnly && (
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-20">
+            <div className="flex items-center gap-2 text-sm text-neutral-300">
+              <ServerIcon className="w-4 h-4 text-red-400" />
+              <span className="font-medium">{currentServer?.name}</span>
+              {type !== "movie" && (
+                <span className="text-neutral-500">
+                  {type === "anime" ? `EP ${episode}` : `S${season} E${episode}`}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <button
+                onClick={handleRefresh}
+                id="player-refresh-btn"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 text-neutral-400 hover:text-white transition-colors"
+                title="Refresh"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={handleFullscreen}
+                id="player-fullscreen-btn"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 text-neutral-400 hover:text-white transition-colors"
+                title="Fullscreen"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 pointer-events-auto">
-            <button
-              onClick={handleRefresh}
-              id="player-refresh-btn"
-              className="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 text-neutral-400 hover:text-white transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleFullscreen}
-              id="player-fullscreen-btn"
-              className="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 text-neutral-400 hover:text-white transition-colors"
-              title="Fullscreen"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        )}
       </motion.div>
 
       {/* Prev / Next episode controls */}
-      {(hasPrev || hasNext) && (
+      {!fullScreenOnly && (hasPrev || hasNext) && (
         <div className="flex items-center justify-between">
           <button
             id="player-prev-btn"
@@ -250,11 +254,13 @@ export default function Player({
       )}
 
       {/* Server Selector */}
-      <ServerSelector
-        servers={availableServers}
-        activeKey={activeServer}
-        onSelect={handleServerChange}
-      />
+      {!fullScreenOnly && (
+        <ServerSelector
+          servers={availableServers}
+          activeKey={activeServer}
+          onSelect={handleServerChange}
+        />
+      )}
     </div>
   );
 }

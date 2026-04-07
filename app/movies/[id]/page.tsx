@@ -44,11 +44,22 @@ export default async function MovieDetailPage({ params }: Props) {
       type: "movie" as const,
     }));
 
+  const trailerObj = movie.videos?.results?.find((v: any) => v.site === "YouTube" && v.type === "Trailer");
+  const trailerKey = trailerObj?.key;
+
   return (
     <div>
       {/* Cinematic Backdrop */}
       <div className="relative w-full h-[70vh] min-h-[400px]">
-        {movie.backdrop_path && (
+        {trailerKey ? (
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&loop=1&playlist=${trailerKey}&controls=0&showinfo=0&rel=0&playsinline=1`}
+              className="absolute top-1/2 left-1/2 w-[300vw] h-[300vh] md:w-[150vw] md:h-[150vh] -translate-x-1/2 -translate-y-1/2 opacity-70"
+              allow="autoplay; encrypted-media"
+            />
+          </div>
+        ) : movie.backdrop_path && (
           <Image
             src={tmdbImg(movie.backdrop_path, "original")}
             alt={movie.title}
@@ -139,44 +150,47 @@ export default async function MovieDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="w-full px-6 md:px-12 lg:px-16 py-10">
-        {/* Actors Grid */}
-        {cast.length > 0 && (
-          <div className="mb-10">
-            <h2 className="section-title text-white mb-4">Actors</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {cast.map((person: { id: number; name: string; character: string; profile_path: string | null }) => (
-                <div key={person.id} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-900/60 border border-neutral-800/40">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-neutral-800 flex-shrink-0">
-                    {person.profile_path ? (
-                      <Image src={tmdbImg(person.profile_path, "w185")} alt={person.name} fill className="object-cover" sizes="40px" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-neutral-500 text-lg">👤</div>
-                    )}
+      {/* Content wrapper with max width */}
+      <div className="max-w-[1400px] mx-auto w-full">
+        {/* Content */}
+        <div className="w-full px-6 md:px-12 lg:px-16 py-10">
+          {/* Actors Grid */}
+          {cast.length > 0 && (
+            <div className="mb-10">
+              <h2 className="section-title text-white mb-4">Actors</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {cast.map((person: { id: number; name: string; character: string; profile_path: string | null }) => (
+                  <div key={person.id} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-900/60 border border-neutral-800/40">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-neutral-800 flex-shrink-0">
+                      {person.profile_path ? (
+                        <Image src={tmdbImg(person.profile_path, "w185")} alt={person.name} fill className="object-cover" sizes="40px" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neutral-500 text-lg">👤</div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{person.name}</p>
+                      <p className="text-xs text-neutral-500 truncate">{person.character}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{person.name}</p>
-                    <p className="text-xs text-neutral-500 truncate">{person.character}</p>
-                  </div>
-                </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Recommendations */}
+        {recs.length > 0 && (
+          <div id="similars" className="w-full px-6 md:px-12 lg:px-16 pb-12 pt-4">
+            <h2 className="section-title text-white mb-6">You may like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
+              {recs.map((rec) => (
+                <LandscapeCard key={rec.id} {...rec} />
               ))}
             </div>
           </div>
         )}
       </div>
-
-      {/* Recommendations */}
-      {recs.length > 0 && (
-        <div id="similars" className="w-full px-6 md:px-12 lg:px-16 pb-12 pt-4">
-          <h2 className="section-title text-white mb-6">You may like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
-            {recs.map((rec) => (
-              <LandscapeCard key={rec.id} {...rec} />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

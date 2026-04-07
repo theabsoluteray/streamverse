@@ -4,6 +4,7 @@ import {
   getPopularAnime,
   getTopRatedAnime,
   getAiringAnime,
+  getAnimeById,
 } from "@/lib/anilist";
 import LandscapeCarousel from "@/components/LandscapeCarousel";
 import { LandscapeCardProps } from "@/components/LandscapeCard";
@@ -30,7 +31,12 @@ export default async function AnimePage() {
   const topRatedData = topRated.status === "fulfilled" ? topRated.value : [];
   const airingData = airing.status === "fulfilled" ? airing.value : [];
 
-  const heroItems: HeroItem[] = trendingData.slice(0, 6).map((a) => ({
+  // Fetch full details for hero to get trailer
+  const heroAnimeData = await Promise.all(
+    trendingData.slice(0, 6).map((a) => getAnimeById(a.id).catch(() => a))
+  );
+
+  const heroItems: HeroItem[] = heroAnimeData.map((a: any) => ({
     id: a.id,
     type: "anime" as const,
     title: a.title.english || a.title.romaji,
@@ -42,6 +48,7 @@ export default async function AnimePage() {
     year: a.seasonYear?.toString() || "",
     watchHref: `/anime/watch/${a.id}`,
     detailHref: `/anime/${a.id}`,
+    trailerKey: a.trailer?.site === "youtube" ? a.trailer.id : undefined,
   })).filter((h) => h.backdrop);
 
   const top10 = popularData.slice(0, 10).map((a) => ({

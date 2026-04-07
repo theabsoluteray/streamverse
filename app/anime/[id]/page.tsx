@@ -51,12 +51,23 @@ export default async function AnimeDetailPage({ params }: Props) {
 
   const title = anime.title.english || anime.title.romaji;
   const backdrop = anime.bannerImage || anime.coverImage.extraLarge;
+  const trailerKey = anime.trailer?.site === "youtube" ? anime.trailer.id : null;
 
   return (
     <div>
       {/* Cinematic Backdrop */}
       <div className="relative w-full h-[70vh] min-h-[400px]">
-        <Image src={backdrop} alt={title} fill className="object-cover object-center" priority sizes="100vw" />
+        {trailerKey ? (
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&loop=1&playlist=${trailerKey}&controls=0&showinfo=0&rel=0&playsinline=1`}
+              className="absolute top-1/2 left-1/2 w-[300vw] h-[300vh] md:w-[150vw] md:h-[150vh] -translate-x-1/2 -translate-y-1/2 opacity-70"
+              allow="autoplay; encrypted-media"
+            />
+          </div>
+        ) : (
+          <Image src={backdrop} alt={title} fill className="object-cover object-center" priority sizes="100vw" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
 
@@ -123,25 +134,27 @@ export default async function AnimeDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Episode List directly on the detail page */}
-      <div className="w-full px-6 md:px-12 lg:px-16 mt-6">
-        <AnimeDetailEpisodeList
-          animeId={anime.id}
-          totalEpisodes={anime.episodes || 24}
-          animeBackdrop={backdrop}
-        />
-      </div>
-
-      {recommended.length > 0 && (
-        <div id="similars" className="w-full px-6 md:px-12 lg:px-16 pb-12 pt-10">
-          <h2 className="section-title text-white mb-6">You may like</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {recommended.map((rec) => (
-              <Card key={rec.id} {...rec} />
-            ))}
-          </div>
+      <div className="max-w-[1400px] mx-auto w-full">
+        {/* Episode List directly on the detail page */}
+        <div className="w-full px-6 md:px-12 lg:px-16 mt-6">
+          <AnimeDetailEpisodeList
+            animeId={anime.id}
+            totalEpisodes={anime.episodes || 24}
+            animeBackdrop={backdrop}
+          />
         </div>
-      )}
+
+        {recommended.length > 0 && (
+          <div id="similars" className="w-full px-6 md:px-12 lg:px-16 pb-12 pt-10">
+            <h2 className="section-title text-white mb-6">You may like</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {recommended.map((rec) => (
+                <Card key={rec.id} {...rec} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -22,23 +22,23 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
   const [nextEl, setNextEl] = useState<HTMLButtonElement | null>(null);
 
   return (
-    <section className="py-6">
+    <section className="py-6 max-w-[1400px] mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-6 md:px-12 lg:px-16">
+      <div className="flex flex-wrap items-center justify-between mb-4 px-6 md:px-12 lg:px-16 gap-4">
         <h2 className="section-title text-white">{title}</h2>
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="flex items-center gap-1 text-sm text-red-400 hover:text-red-300 font-medium transition-colors"
+            className="flex items-center gap-1 text-sm text-neutral-400 hover:text-white font-semibold transition-colors bg-white/5 hover:bg-white/10 px-3 py-1 rounded-md backdrop-blur-sm border border-white/10"
           >
-            View All
+            VIEW ALL
             <ChevronRight className="w-4 h-4" />
           </Link>
         )}
       </div>
 
       {/* Swiper */}
-      <div className="px-6 md:px-12 lg:px-16 relative">
+      <div className="px-6 md:px-12 lg:px-16 relative group">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -58,7 +58,7 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
               1024: { slidesPerView: 5.2, spaceBetween: 18 },
               1280: { slidesPerView: 6, spaceBetween: 18 },
             }}
-            className="!overflow-visible"
+            className=""
           >
             {items.map((item) => (
               <SwiperSlide key={`${item.type}-${item.id}`}>
@@ -70,17 +70,17 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
 
         <button
           ref={setPrevEl}
-          className="absolute -left-3 top-1/3 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 hidden md:flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
+          className="absolute -left-4 top-1/3 -translate-y-1/2 z-10 w-12 h-12 rounded-full premium-glass hidden md:flex items-center justify-center text-white hover:bg-red-600 hover:scale-110 hover:border-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 disabled:opacity-0"
           aria-label="Previous"
         >
-          <ChevronRight className="w-4 h-4 rotate-180" />
+          <ChevronRight className="w-6 h-6 rotate-180" />
         </button>
         <button
           ref={setNextEl}
-          className="absolute -right-3 top-1/3 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/70 border border-neutral-800 hidden md:flex items-center justify-center text-white hover:bg-red-500/80 transition-all"
+          className="absolute -right-4 top-1/3 -translate-y-1/2 z-10 w-12 h-12 rounded-full premium-glass hidden md:flex items-center justify-center text-white hover:bg-red-600 hover:scale-110 hover:border-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 disabled:opacity-0"
           aria-label="Next"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-6 h-6" />
         </button>
       </div>
     </section>

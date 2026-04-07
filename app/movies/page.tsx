@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getTrendingMovies, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, tmdbImg } from "@/lib/tmdb";
+import { getTrendingMovies, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, tmdbImg, getMovieById } from "@/lib/tmdb";
 import LandscapeCarousel from "@/components/LandscapeCarousel";
 import { LandscapeCardProps } from "@/components/LandscapeCard";
 import Hero, { HeroItem } from "@/components/Hero";
@@ -25,7 +25,11 @@ export default async function MoviesPage() {
   const popularData = popular.status === "fulfilled" ? popular.value : [];
   const topRatedData = topRated.status === "fulfilled" ? topRated.value : [];
 
-  const heroItems: HeroItem[] = trendingData.slice(0, 6).map((m) => ({
+  const heroMoviesData = await Promise.all(
+    trendingData.slice(0, 6).map((m) => getMovieById(m.id).catch(() => m))
+  );
+
+  const heroItems: HeroItem[] = heroMoviesData.map((m: any) => ({
     id: m.id,
     type: "movie" as const,
     title: m.title,
@@ -37,6 +41,7 @@ export default async function MoviesPage() {
     year: m.release_date?.slice(0, 4) || "",
     watchHref: `/movies/watch/${m.id}`,
     detailHref: `/movies/${m.id}`,
+    trailerKey: m.videos?.results?.find((v: any) => v.site === "YouTube" && v.type === "Trailer")?.key,
   }));
 
   const top10 = popularData.slice(0, 10).map((m) => ({

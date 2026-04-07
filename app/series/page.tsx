@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getTrendingSeries, getAiringSeries, getPopularSeries, getTopRatedSeries, tmdbImg } from "@/lib/tmdb";
+import { getTrendingSeries, getAiringSeries, getPopularSeries, getTopRatedSeries, tmdbImg, getSeriesById } from "@/lib/tmdb";
 import LandscapeCarousel from "@/components/LandscapeCarousel";
 import { LandscapeCardProps } from "@/components/LandscapeCard";
 import Hero, { HeroItem } from "@/components/Hero";
@@ -25,7 +25,11 @@ export default async function SeriesPage() {
   const popularData = popular.status === "fulfilled" ? popular.value : [];
   const topRatedData = topRated.status === "fulfilled" ? topRated.value : [];
 
-  const heroItems: HeroItem[] = trendingData.slice(0, 6).map((s) => ({
+  const heroSeriesData = await Promise.all(
+    trendingData.slice(0, 6).map((s) => getSeriesById(s.id).catch(() => s))
+  );
+
+  const heroItems: HeroItem[] = heroSeriesData.map((s: any) => ({
     id: s.id,
     type: "series" as const,
     title: s.name,
@@ -37,6 +41,7 @@ export default async function SeriesPage() {
     year: s.first_air_date?.slice(0, 4) || "",
     watchHref: `/series/watch/${s.id}`,
     detailHref: `/series/${s.id}`,
+    trailerKey: s.videos?.results?.find((v: any) => v.site === "YouTube" && v.type === "Trailer")?.key,
   }));
 
   const top10 = popularData.slice(0, 10).map((s) => ({
