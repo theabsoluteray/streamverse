@@ -88,7 +88,7 @@ export default async function AnimeDetailPage({ params }: Props) {
                 <span>{anime.episodes} Episodes</span>
               </>
             )}
-            {anime.averageScore > 0 && (
+            {anime.averageScore && anime.averageScore > 0 ? (
               <>
                 <span className="text-neutral-700">·</span>
                 <span className="flex items-center gap-1">
@@ -96,7 +96,7 @@ export default async function AnimeDetailPage({ params }: Props) {
                   {(anime.averageScore / 10).toFixed(1)}
                 </span>
               </>
-            )}
+            ) : null}
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight max-w-2xl">{title}</h1>
