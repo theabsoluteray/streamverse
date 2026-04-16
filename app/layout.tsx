@@ -31,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`dark ${inter.variable}`} suppressHydrationWarning>
-      <body className="antialiased min-h-screen bg-black text-neutral-100 font-[var(--font-inter)] overflow-x-hidden" suppressHydrationWarning>
+      <body className="antialiased min-h-screen bg-black text-neutral-400 font-[var(--font-inter)] overflow-x-hidden" suppressHydrationWarning>
         <Navbar />
         <main className="min-h-screen">{children}</main>
         <Footer />

@@ -73,10 +73,10 @@ export default async function AnimePage() {
     <>
       <Hero items={heroItems} />
       <Top10Section items={top10} />
-      <LandscapeCarousel title="🔥 Trending Now" items={toCards(trendingData)} />
-      <LandscapeCarousel title="⭐ Popular Anime" items={toCards(popularData)} />
-      <LandscapeCarousel title="🏆 Top Rated" items={toCards(topRatedData)} />
-      <LandscapeCarousel title="📡 Currently Airing" items={toCards(airingData)} />
+      <LandscapeCarousel title="Trending Now" items={toCards(trendingData)} />
+      <LandscapeCarousel title="Popular Anime" items={toCards(popularData)} />
+      <LandscapeCarousel title="Top Rated" items={toCards(topRatedData)} />
+      <LandscapeCarousel title="Currently Airing" items={toCards(airingData)} />
     </>
   );
 }

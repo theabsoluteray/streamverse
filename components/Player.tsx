@@ -157,7 +157,6 @@ export default function Player({
     saveServer(key);
     setShowError(false);
     setShowServerDropdown(false);
-
   };
 
   const handleRefresh = () => {
@@ -169,9 +168,6 @@ export default function Player({
     router.back();
   };
 
-
-
-  // Mouse move to show controls
   const handleMouseMove = useCallback(() => {
     if (fullScreenOnly) {
       resetControlsTimer();
@@ -189,10 +185,10 @@ export default function Player({
       {/* Player Container */}
       <motion.div
         ref={containerRef}
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className={`relative w-full ${fullScreenOnly ? 'h-full rounded-none border-none' : 'aspect-video rounded-xl border border-red-500/20 glow-red'} overflow-hidden bg-black`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className={`relative w-full ${fullScreenOnly ? 'h-full rounded-none' : 'aspect-video rounded-lg border border-neutral-800'} overflow-hidden bg-black`}
       >
         {/* Loading overlay */}
         <AnimatePresence>
@@ -203,8 +199,8 @@ export default function Player({
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10 gap-3"
             >
-              <div className="w-12 h-12 rounded-full border-2 border-red-500/30 border-t-red-500 animate-spin" />
-              <p className="text-neutral-400 text-sm">Loading {currentServer?.name || "server"}...</p>
+              <div className="w-8 h-8 rounded-full border-2 border-neutral-700 border-t-white animate-spin" />
+              <p className="text-neutral-500 text-xs">{currentServer?.name || "Loading"}...</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -216,23 +212,21 @@ export default function Player({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-black/95 border border-red-500/30 text-sm shadow-xl"
+              className="absolute top-14 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2 rounded-lg bg-black/95 border border-neutral-800 text-sm shadow-xl"
             >
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-              <span className="text-neutral-300">{currentServer?.name} may not be working.</span>
+              <AlertCircle className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
+              <span className="text-neutral-400 text-xs">{currentServer?.name} may not be working.</span>
               {nextFallback && (
                 <button
                   onClick={() => handleServerChange(nextFallback.key)}
-                  className="flex items-center gap-1 text-red-400 hover:text-red-300 font-medium transition-colors"
+                  className="flex items-center gap-1 text-white text-xs font-medium transition-colors"
                 >
-                  Try {nextFallback.name} <ChevronRight className="w-3.5 h-3.5" />
+                  Try {nextFallback.name} <ChevronRight className="w-3 h-3" />
                 </button>
               )}
             </motion.div>
           )}
         </AnimatePresence>
-
-
 
         {/* Iframe */}
         {currentServer && (
@@ -247,7 +241,6 @@ export default function Player({
             onLoad={handleLoad}
             onError={handleServerError}
             title={`Streaming - ${currentServer.name}`}
-
           />
         )}
 
@@ -259,57 +252,55 @@ export default function Player({
               animate={{ opacity: 1, y: 0 }}
               exit={fullScreenOnly ? { opacity: 0, y: -20 } : undefined}
               transition={{ duration: 0.25 }}
-              className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-black/90 via-black/50 to-transparent z-20"
+              className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/80 to-transparent z-20"
               style={{ pointerEvents: 'auto' }}
             >
-              {/* Left: Back button + server info */}
-              <div className="flex items-center gap-3 pointer-events-auto">
+              {/* Left */}
+              <div className="flex items-center gap-2 pointer-events-auto">
                 <button
                   onClick={handleBack}
                   id="player-back-btn"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/50 hover:bg-red-500/30 text-neutral-300 hover:text-white transition-all border border-white/10 hover:border-red-500/40"
+                  className="w-7 h-7 flex items-center justify-center rounded bg-black/50 text-neutral-400 hover:text-white transition-colors border border-neutral-800"
                   title="Go Back"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3.5 h-3.5" />
                 </button>
-                <div className="flex items-center gap-2 text-sm text-neutral-300">
-                  <ServerIcon className="w-4 h-4 text-red-400" />
+                <div className="flex items-center gap-2 text-xs text-neutral-400">
                   <span className="font-medium">{currentServer?.name}</span>
                   {type !== "movie" && (
-                    <span className="text-neutral-500">
+                    <span className="text-neutral-600">
                       {type === "anime" ? `EP ${episode}` : `S${season} E${episode}`}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Right: Server dropdown + controls */}
-              <div className="flex items-center gap-2 pointer-events-auto">
+              {/* Right */}
+              <div className="flex items-center gap-1.5 pointer-events-auto">
                 {/* Server Selector Dropdown */}
                 <div className="relative">
                   <button
                     onClick={() => setShowServerDropdown(!showServerDropdown)}
                     id="player-server-dropdown-btn"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/50 hover:bg-red-500/20 text-neutral-300 hover:text-white transition-all border border-white/10 hover:border-red-500/40 text-xs font-medium"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded bg-black/50 text-neutral-400 hover:text-white transition-colors border border-neutral-800 text-xs font-medium"
                     title="Change Server"
                   >
-                    <ServerIcon className="w-3.5 h-3.5 text-red-400" />
+                    <ServerIcon className="w-3 h-3" />
                     Server
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3 h-3 transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* Dropdown menu */}
                   <AnimatePresence>
                     {showServerDropdown && (
                       <motion.div
-                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full right-0 mt-2 w-48 rounded-xl bg-black/95 border border-neutral-700/50 backdrop-blur-xl shadow-2xl overflow-hidden z-50"
+                        className="absolute top-full right-0 mt-1 w-44 rounded-lg bg-neutral-900 border border-neutral-800 shadow-2xl overflow-hidden z-50"
                       >
-                        <div className="p-1.5">
-                          <p className="px-2.5 py-1.5 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
+                        <div className="p-1">
+                          <p className="px-2.5 py-1.5 text-[10px] font-medium text-neutral-600 uppercase tracking-wider">
                             Select Server
                           </p>
                           {availableServers.map((server) => {
@@ -318,20 +309,20 @@ export default function Player({
                               <button
                                 key={server.key}
                                 onClick={() => handleServerChange(server.key)}
-                                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all ${
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-xs transition-all ${
                                   isActive
-                                    ? 'bg-red-500/15 text-red-400'
-                                    : 'text-neutral-300 hover:bg-neutral-800/60 hover:text-white'
+                                    ? 'bg-neutral-800 text-white'
+                                    : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-white'
                                 }`}
                               >
                                 {isActive ? (
-                                  <Check className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                                  <Check className="w-3 h-3 flex-shrink-0" />
                                 ) : (
-                                  <div className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <div className="w-3 h-3 flex-shrink-0" />
                                 )}
                                 <span className="font-medium">{server.name}</span>
                                 {server.isPrimary && (
-                                  <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-red-500/15 text-red-500 border border-red-500/20 font-semibold tracking-wide">
+                                  <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-medium">
                                     HD
                                   </span>
                                 )}
@@ -347,18 +338,18 @@ export default function Player({
                 <button
                   onClick={handleRefresh}
                   id="player-refresh-btn"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/50 hover:bg-red-500/30 text-neutral-400 hover:text-white transition-all border border-white/10 hover:border-red-500/40"
+                  className="w-7 h-7 flex items-center justify-center rounded bg-black/50 text-neutral-500 hover:text-white transition-colors border border-neutral-800"
                   title="Refresh"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
+                  <RefreshCw className="w-3 h-3" />
                 </button>
                 <button
                   onClick={handleFullscreen}
                   id="player-fullscreen-btn"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-black/50 hover:bg-red-500/30 text-neutral-400 hover:text-white transition-all border border-white/10 hover:border-red-500/40"
+                  className="w-7 h-7 flex items-center justify-center rounded bg-black/50 text-neutral-500 hover:text-white transition-colors border border-neutral-800"
                   title="Fullscreen"
                 >
-                  <Maximize2 className="w-3.5 h-3.5" />
+                  <Maximize2 className="w-3 h-3" />
                 </button>
               </div>
             </motion.div>
@@ -373,7 +364,7 @@ export default function Player({
             id="player-prev-btn"
             onClick={onPrev}
             disabled={!hasPrev}
-            className="px-5 py-2 rounded-lg glass border border-neutral-800/50 text-sm font-medium text-neutral-300 hover:text-white hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="px-4 py-1.5 rounded border border-neutral-800 text-xs font-medium text-neutral-400 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             ← Previous
           </button>
@@ -381,48 +372,42 @@ export default function Player({
             id="player-next-btn"
             onClick={onNext}
             disabled={!hasNext}
-            className="px-5 py-2 rounded-lg bg-red-500/90 hover:bg-red-500 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="px-4 py-1.5 rounded bg-white text-black text-xs font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:bg-neutral-200"
           >
             Next →
           </button>
         </div>
       )}
 
-      {/* Server Selector (below player, non-fullscreen only) */}
+      {/* Server Selector below player */}
       {!fullScreenOnly && (
-        <div className="glass rounded-xl border border-neutral-800/40 p-4 space-y-3">
+        <div className="rounded-lg border border-neutral-800/60 p-3 space-y-2">
           <div className="flex items-center gap-2">
-            <ServerIcon className="w-4 h-4 text-red-400" />
-            <span className="text-sm font-semibold text-neutral-300">Streaming Servers</span>
-            <span className="text-xs text-neutral-500">— if one fails, try another</span>
+            <ServerIcon className="w-3.5 h-3.5 text-neutral-500" />
+            <span className="text-xs font-medium text-neutral-400">Servers</span>
+            <span className="text-[10px] text-neutral-600">— if one fails, try another</span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {availableServers.map((server, i) => {
+          <div className="flex flex-wrap gap-1.5">
+            {availableServers.map((server) => {
               const isActive = server.key === activeServer;
               return (
-                <motion.button
+                <button
                   key={server.key}
                   id={`server-btn-${server.key}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
                   onClick={() => handleServerChange(server.key)}
-                  className={`relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 border flex items-center gap-1.5 ${
+                  className={`px-3 py-1 rounded text-xs font-medium transition-all border flex items-center gap-1.5 ${
                     isActive
-                      ? "bg-red-500/20 border-red-500/60 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
-                      : "border-neutral-800/50 text-neutral-400 hover:border-red-500/30 hover:text-neutral-200 hover:bg-neutral-900/50"
+                      ? "bg-white text-black border-white"
+                      : "border-neutral-800 text-neutral-500 hover:border-neutral-600 hover:text-neutral-300"
                   }`}
                 >
-                  {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0 animate-pulse" />
-                  )}
                   {server.name}
                   {server.isPrimary && (
-                    <span className="text-[9px] px-1 py-0.5 rounded bg-red-500/15 text-red-500 border border-red-500/20 leading-none font-semibold tracking-wide">
+                    <span className={`text-[9px] px-1 py-0.5 rounded font-medium ${isActive ? 'bg-black/10 text-black' : 'bg-neutral-800 text-neutral-500'}`}>
                       HD
                     </span>
                   )}
-                </motion.button>
+                </button>
               );
             })}
           </div>

@@ -30,7 +30,7 @@ export default function Schedule({ schedules }: ScheduleProps) {
   return (
     <div>
       {/* Day Tabs */}
-      <div className="flex gap-1.5 mb-6 overflow-x-auto pb-2">
+      <div className="flex gap-1 mb-5 overflow-x-auto pb-2">
         {DAYS.map((day, i) => {
           const hasContent = !!(grouped[i]?.length);
           const isToday = i === today;
@@ -39,18 +39,18 @@ export default function Schedule({ schedules }: ScheduleProps) {
               key={day}
               id={`schedule-day-${day}`}
               onClick={() => setActiveDay(i)}
-              className={`flex flex-col items-center px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all min-w-[60px] border ${
+              className={`flex flex-col items-center px-3 py-2 rounded-md text-xs font-medium whitespace-nowrap transition-all min-w-[48px] border ${
                 activeDay === i
-                  ? "bg-red-500/20 border-red-500/50 text-red-400"
-                  : "border-neutral-800/40 text-neutral-400 hover:text-white hover:border-neutral-700/50"
+                  ? "bg-white text-black border-white"
+                  : "border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-700"
               }`}
             >
               {day}
               {isToday && (
-                <span className="text-[10px] text-red-400 font-bold mt-0.5">TODAY</span>
+                <span className="text-[9px] font-bold mt-0.5">TODAY</span>
               )}
               {hasContent && !isToday && (
-                <span className="w-1.5 h-1.5 rounded-full bg-neutral-500 mt-1" />
+                <span className="w-1 h-1 rounded-full bg-neutral-500 mt-0.5" />
               )}
             </button>
           );
@@ -59,12 +59,12 @@ export default function Schedule({ schedules }: ScheduleProps) {
 
       {/* Schedule List */}
       {daySchedules.length === 0 ? (
-        <div className="text-center py-16 text-neutral-500">
-          <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>No anime scheduled for {DAYS[activeDay]}</p>
+        <div className="text-center py-14 text-neutral-600">
+          <Clock className="w-8 h-8 mx-auto mb-2 opacity-30" />
+          <p className="text-xs">No anime scheduled for {DAYS[activeDay]}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {daySchedules.map((s) => {
             const time = new Date(s.airingAt * 1000);
             const title = s.media.title.english || s.media.title.romaji;
@@ -78,38 +78,27 @@ export default function Schedule({ schedules }: ScheduleProps) {
                 <Link
                   href={`/anime/${s.media.id}`}
                   id={`schedule-item-${s.media.id}`}
-                  className="flex gap-3 glass rounded-xl p-3 border border-neutral-800/30 hover:border-red-500/30 transition-all group card-hover"
+                  className="flex gap-3 rounded-lg p-3 border border-neutral-800/30 hover:border-neutral-700 transition-all group bg-neutral-900/30"
                 >
-                  <div className="relative w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative w-12 h-16 rounded overflow-hidden flex-shrink-0">
                     <Image
                       src={s.media.coverImage.large || s.media.coverImage.medium}
                       alt={title}
                       fill
                       className="object-cover"
-                      sizes="56px"
+                      sizes="48px"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-xs font-bold text-red-400">
-                        EP {s.episode}
-                      </span>
-                      <span className="text-[10px] text-neutral-500">
+                      <span className="text-[10px] font-bold text-white">EP {s.episode}</span>
+                      <span className="text-[10px] text-neutral-600">
                         {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
-                    <h3 className="text-sm font-semibold text-neutral-200 group-hover:text-red-400 transition-colors line-clamp-2 leading-snug">
+                    <h3 className="text-xs font-medium text-neutral-400 group-hover:text-white transition-colors line-clamp-2 leading-snug">
                       {title}
                     </h3>
-                    {s.media.genres.length > 0 && (
-                      <div className="flex gap-1 mt-1.5 flex-wrap">
-                        {s.media.genres.slice(0, 2).map((g) => (
-                          <span key={g} className="text-[10px] px-1.5 py-0.5 rounded-full bg-neutral-900/60 text-neutral-400">
-                            {g}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </Link>
               </motion.div>

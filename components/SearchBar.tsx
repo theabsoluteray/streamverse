@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Film, Tv, Sparkles, Loader2 } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 import { searchAnime, AniMedia } from "@/lib/anilist";
 import { searchMovies, searchSeries, TMDBMovie, TMDBSeries } from "@/lib/tmdb";
 import Image from "next/image";
@@ -68,18 +68,18 @@ export default function SearchBar({ initialQuery = "" }: SearchBarProps) {
     }
   };
 
-  const TABS: { label: string; key: Tab; icon: React.ReactNode; count: number }[] = [
-    { key: "all", label: "All", icon: <Search className="w-3.5 h-3.5" />, count: anime.length + movies.length + series.length },
-    { key: "anime", label: "Anime", icon: <Sparkles className="w-3.5 h-3.5" />, count: anime.length },
-    { key: "movies", label: "Movies", icon: <Film className="w-3.5 h-3.5" />, count: movies.length },
-    { key: "series", label: "Series", icon: <Tv className="w-3.5 h-3.5" />, count: series.length },
+  const TABS: { label: string; key: Tab; count: number }[] = [
+    { key: "all", label: "All", count: anime.length + movies.length + series.length },
+    { key: "movies", label: "Movies", count: movies.length },
+    { key: "series", label: "Series", count: series.length },
+    { key: "anime", label: "Anime", count: anime.length },
   ];
 
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* Search Input */}
       <form onSubmit={handleSubmit} className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
         <input
           ref={inputRef}
           id="search-input"
@@ -87,14 +87,14 @@ export default function SearchBar({ initialQuery = "" }: SearchBarProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search anime, movies, series..."
-          className="w-full bg-neutral-900/60 border border-neutral-800/50 focus:border-red-500/60 rounded-xl pl-12 pr-12 py-3.5 text-neutral-100 placeholder-neutral-500 outline-none transition-all text-sm backdrop-blur-sm"
+          className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-lg pl-11 pr-12 py-3 text-neutral-200 placeholder-neutral-600 outline-none transition-all text-sm"
           autoComplete="off"
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {isLoading && <Loader2 className="w-4 h-4 text-red-400 animate-spin" />}
+          {isLoading && <Loader2 className="w-3.5 h-3.5 text-neutral-500 animate-spin" />}
           {query && (
-            <button type="button" onClick={() => setQuery("")} className="text-neutral-400 hover:text-white transition-colors">
-              <X className="w-4 h-4" />
+            <button type="button" onClick={() => setQuery("")} className="text-neutral-500 hover:text-white transition-colors">
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -102,21 +102,21 @@ export default function SearchBar({ initialQuery = "" }: SearchBarProps) {
 
       {/* Tabs */}
       {debouncedQuery && (
-        <div className="flex gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar">
+        <div className="flex gap-1.5 mt-3 overflow-x-auto pb-1 no-scrollbar">
           {TABS.map((t) => (
             <button
               key={t.key}
               id={`search-tab-${t.key}`}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              className={`px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-all ${
                 tab === t.key
-                  ? "bg-red-500/20 text-red-400 border border-red-500/40"
-                  : "text-neutral-400 border border-neutral-800/40 hover:text-white hover:border-neutral-700"
+                  ? "bg-white text-black"
+                  : "text-neutral-500 border border-neutral-800 hover:text-white hover:border-neutral-700"
               }`}
             >
-              {t.icon} {t.label}
+              {t.label}
               {t.count > 0 && (
-                <span className="ml-0.5 text-xs opacity-70">({t.count})</span>
+                <span className="ml-1 opacity-60">({t.count})</span>
               )}
             </button>
           ))}
@@ -131,23 +131,8 @@ export default function SearchBar({ initialQuery = "" }: SearchBarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2 }}
-            className="mt-3 space-y-4"
+            className="mt-3 space-y-3"
           >
-            {(tab === "all" || tab === "anime") && anime.length > 0 && (
-              <ResultSection
-                title="Anime"
-                items={anime.map((a) => ({
-                  id: a.id,
-                  title: a.title.english || a.title.romaji,
-                  poster: a.coverImage.large,
-                  href: `/anime/${a.id}`,
-                  year: a.seasonYear?.toString(),
-                  rating: a.averageScore ? (a.averageScore / 10).toFixed(1) : null,
-                  type: "anime" as const,
-                }))}
-              />
-            )}
-
             {(tab === "all" || tab === "movies") && movies.length > 0 && (
               <ResultSection
                 title="Movies"
@@ -178,8 +163,23 @@ export default function SearchBar({ initialQuery = "" }: SearchBarProps) {
               />
             )}
 
+            {(tab === "all" || tab === "anime") && anime.length > 0 && (
+              <ResultSection
+                title="Anime"
+                items={anime.map((a) => ({
+                  id: a.id,
+                  title: a.title.english || a.title.romaji,
+                  poster: a.coverImage.large,
+                  href: `/anime/${a.id}`,
+                  year: a.seasonYear?.toString(),
+                  rating: a.averageScore ? (a.averageScore / 10).toFixed(1) : null,
+                  type: "anime" as const,
+                }))}
+              />
+            )}
+
             {anime.length === 0 && movies.length === 0 && series.length === 0 && (
-              <div className="text-center text-neutral-500 py-8 text-sm">
+              <div className="text-center text-neutral-600 py-8 text-xs">
                 No results found for &ldquo;{debouncedQuery}&rdquo;
               </div>
             )}
@@ -198,27 +198,27 @@ function ResultSection({
   items: { id: number; title: string; poster: string; href: string; year?: string; rating: string | null; type: "anime" | "movie" | "series" }[];
 }) {
   return (
-    <div className="glass rounded-xl border border-neutral-800/30 overflow-hidden">
-      <div className="px-4 py-2 border-b border-neutral-800/30 bg-neutral-900/30">
-        <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">{title}</span>
+    <div className="rounded-lg border border-neutral-800/40 overflow-hidden">
+      <div className="px-3 py-1.5 border-b border-neutral-800/40 bg-neutral-900/50">
+        <span className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">{title}</span>
       </div>
-      <div className="divide-y divide-neutral-800/40">
+      <div className="divide-y divide-neutral-800/30">
         {items.map((item) => (
           <a
             key={item.id}
             href={item.href}
             id={`search-result-${item.type}-${item.id}`}
-            className="flex items-center gap-3 px-4 py-2.5 hover:bg-neutral-900/40 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 hover:bg-neutral-900/60 transition-colors"
           >
-            <div className="relative w-8 h-12 rounded-md overflow-hidden flex-shrink-0 bg-neutral-800">
-              <Image src={item.poster} alt={item.title} fill className="object-cover" sizes="32px" />
+            <div className="relative w-7 h-10 rounded overflow-hidden flex-shrink-0 bg-neutral-800">
+              <Image src={item.poster} alt={item.title} fill className="object-cover" sizes="28px" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-neutral-200 truncate">{item.title}</p>
-              <p className="text-xs text-neutral-500">{item.year}</p>
+              <p className="text-xs font-medium text-neutral-300 truncate">{item.title}</p>
+              <p className="text-[10px] text-neutral-600">{item.year}</p>
             </div>
             {item.rating && (
-              <span className="text-xs text-yellow-400 font-semibold flex-shrink-0">★ {item.rating}</span>
+              <span className="text-[10px] text-neutral-500 font-medium flex-shrink-0">★ {item.rating}</span>
             )}
           </a>
         ))}

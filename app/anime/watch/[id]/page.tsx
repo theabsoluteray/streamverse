@@ -25,7 +25,7 @@ export default function AnimeWatchPage() {
 
   if (!malId) {
     return <div className="fixed inset-0 z-[99999] bg-black isolate flex items-center justify-center">
-             <div className="w-10 h-10 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+             <div className="w-8 h-8 border border-neutral-700 border-t-white rounded-full animate-spin"></div>
            </div>;
   }
 

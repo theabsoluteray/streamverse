@@ -29,10 +29,10 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="flex items-center gap-1 text-sm text-neutral-400 hover:text-white font-semibold transition-colors bg-white/5 hover:bg-white/10 px-3 py-1 rounded-md backdrop-blur-sm border border-white/10"
+            className="flex items-center gap-1 text-xs text-neutral-500 hover:text-white font-medium transition-colors uppercase tracking-wider"
           >
-            VIEW ALL
-            <ChevronRight className="w-4 h-4" />
+            View All
+            <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         )}
       </div>
@@ -58,7 +58,6 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
               1024: { slidesPerView: 5.2, spaceBetween: 18 },
               1280: { slidesPerView: 6, spaceBetween: 18 },
             }}
-            className=""
           >
             {items.map((item) => (
               <SwiperSlide key={`${item.type}-${item.id}`}>
@@ -70,17 +69,17 @@ export default function Carousel({ title, viewAllHref, items, isLoading }: Carou
 
         <button
           ref={setPrevEl}
-          className="absolute -left-4 top-1/3 -translate-y-1/2 z-10 w-12 h-12 rounded-full premium-glass hidden md:flex items-center justify-center text-white hover:bg-red-600 hover:scale-110 hover:border-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 disabled:opacity-0"
+          className="absolute -left-3 top-1/3 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/80 border border-neutral-800 hidden md:flex items-center justify-center text-neutral-400 hover:text-white hover:border-neutral-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
           aria-label="Previous"
         >
-          <ChevronRight className="w-6 h-6 rotate-180" />
+          <ChevronRight className="w-4 h-4 rotate-180" />
         </button>
         <button
           ref={setNextEl}
-          className="absolute -right-4 top-1/3 -translate-y-1/2 z-10 w-12 h-12 rounded-full premium-glass hidden md:flex items-center justify-center text-white hover:bg-red-600 hover:scale-110 hover:border-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 disabled:opacity-0"
+          className="absolute -right-3 top-1/3 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/80 border border-neutral-800 hidden md:flex items-center justify-center text-neutral-400 hover:text-white hover:border-neutral-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
           aria-label="Next"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </section>

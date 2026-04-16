@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import SearchBar from "@/components/SearchBar";
-import { Search } from "lucide-react";
 
 interface Props {
   searchParams: Promise<{ q?: string; tab?: string }>;
@@ -20,13 +19,10 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <div className="pt-24 pb-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-            <Search className="w-7 h-7 text-red-400" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Search</h1>
-          <p className="text-neutral-400 text-sm">
-            Find your next favorite anime, movie, or TV series
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-white mb-1">Search</h1>
+          <p className="text-neutral-600 text-xs">
+            Find anime, movies, or series
           </p>
         </div>
 
